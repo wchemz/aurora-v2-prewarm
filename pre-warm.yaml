@@ -137,7 +137,7 @@ Resources:
                       tags = client.list_tags_for_resource(ResourceName=cluster['DBClusterArn'])['TagList']
                       if any(tag['Key'] == 'cooldown' and tag['Value'] == 'yes' for tag in tags):
                           # Modify the DB cluster with the new Serverless V2 scaling configuration for cooldown
-                          try
+                          try:
                             response = client.modify_db_cluster(
                                 DBClusterIdentifier=cluster['DBClusterIdentifier'],
                                 ServerlessV2ScalingConfiguration={
