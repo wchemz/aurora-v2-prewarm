@@ -91,18 +91,20 @@ Resources:
                           # Fetch the min and max capacity from environment variables
                           min_capacity = int(os.environ.get('MIN_CAPACITY', '8'))  # Default to 8 if not set
                           max_capacity = int(os.environ.get('MAX_CAPACITY', '64'))  # Default to 64 if not set
-                          
-                          # Modify the Serverless V2 scaling configuration
-                          response = client.modify_db_cluster(
-                              DBClusterIdentifier=cluster['DBClusterIdentifier'],
-                              ServerlessV2ScalingConfiguration={
-                                  'MinCapacity': min_capacity,
-                                  'MaxCapacity': max_capacity
-                              },
-                              ApplyImmediately=True
-                          )
-                          
-                          print(f"Configured Serverless V2 scaling settings for {cluster['DBClusterIdentifier']} to MinCapacity: {min_capacity} and MaxCapacity: {max_capacity}")
+                          try:
+                            # Modify the Serverless V2 scaling configuration
+                            response = client.modify_db_cluster(
+                                DBClusterIdentifier=cluster['DBClusterIdentifier'],
+                                ServerlessV2ScalingConfiguration={
+                                    'MinCapacity': min_capacity,
+                                    'MaxCapacity': max_capacity
+                                },
+                                ApplyImmediately=True
+                            )
+                            print(f"Configured Serverless V2 scaling settings for {cluster['DBClusterIdentifier']} to MinCapacity: {min_capacity} and MaxCapacity: {max_capacity}")
+                          except Exception as e:
+                            # Catch-all for any other exceptions not specified
+                            print(f"An unexpected error occurred while modifying {cluster['DBClusterIdentifier']}: {e}")
       Runtime: python3.12
       Timeout: 30
       Environment:
@@ -135,16 +137,19 @@ Resources:
                       tags = client.list_tags_for_resource(ResourceName=cluster['DBClusterArn'])['TagList']
                       if any(tag['Key'] == 'cooldown' and tag['Value'] == 'yes' for tag in tags):
                           # Modify the DB cluster with the new Serverless V2 scaling configuration for cooldown
-                          response = client.modify_db_cluster(
-                              DBClusterIdentifier=cluster['DBClusterIdentifier'],
-                              ServerlessV2ScalingConfiguration={
-                                  'MinCapacity': min_capacity,
-                                  'MaxCapacity': max_capacity
-                              },
-                              ApplyImmediately=True
-                          )
-                          print(f"Cooled down {cluster['DBClusterIdentifier']} to MinCapacity: {min_capacity} and MaxCapacity: {max_capacity} ACUs.")
-
+                          try
+                            response = client.modify_db_cluster(
+                                DBClusterIdentifier=cluster['DBClusterIdentifier'],
+                                ServerlessV2ScalingConfiguration={
+                                    'MinCapacity': min_capacity,
+                                    'MaxCapacity': max_capacity
+                                },
+                                ApplyImmediately=True
+                            )
+                            print(f"Cooled down {cluster['DBClusterIdentifier']} to MinCapacity: {min_capacity} and MaxCapacity: {max_capacity} ACUs.")
+                          except Exception as e:
+                            # Catch-all for any other exceptions not specified
+                            print(f"An unexpected error occurred while modifying {cluster['DBClusterIdentifier']}: {e}")
       Runtime: python3.12
       Timeout: 30
       Environment:
